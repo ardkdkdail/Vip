@@ -1,0 +1,102 @@
+{
+  "outbounds": [
+    {
+      "type": "wireguard",
+      "tag": "Warp-IR1",
+      "local_address": [
+        "172.16.0.2/32",
+        "2606:4700:110:846c:e510:bfa1:ea9f:5247/128"
+      ],
+      "private_key": "qH+XTZq58QPlAN45gZ9983SFDIU4+GhMbZCDH3+NUFE=",
+      "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
+      "server": "162.159.195.155",
+      "server_port": 1074,
+      "reserved": [181, 144, 120],
+      "mtu": 1280,
+      "fake_packets": "3-6",
+      "fake_packets_size": "15-35",
+      "fake_packets_delay": "5-10",
+      "fake_packets_mode": "m4"
+    },
+    {
+      "type": "wireguard",
+      "tag": "Warp-Main1",
+      "detour": "Warp-IR1",
+      "local_address": [
+        "172.16.0.3/32",
+        "2606:4700:110:846c:e510:bfa1:ea9f:1234/128"
+      ],
+      "private_key": "EJoSLF2/aYAglcHNh5XRYO9SAeTcHPqi6YYuSi2A0WM=",
+      "peer_public_key": "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
+      "server": "162.159.195.155",
+      "server_port": 1074,
+      "reserved": [95, 94, 9],
+      "mtu": 1330,
+      "fake_packets": "2-4",
+      "fake_packets_size": "15-30",
+      "fake_packets_delay": "8-18",
+      "fake_packets_mode": "m4"
+    },
+    {
+      "type": "vless",
+      "tag": "Reality-Vision",
+      "server": "1.1.1.1", // <== تغییر بده به IP سرور واقعی
+      "server_port": 443,
+      "uuid": "c71e1a10-35c3-42ab-82d7-xxxxxxxxxxxx", // <== UUID خودت
+      "flow": "xtls-rprx-vision",
+      "tls": {
+        "enabled": true,
+        "server_name": "discord.com",
+        "reality": {
+          "enabled": true,
+          "public_key": "your_reality_server_public_key",  // <== کلید واقعی
+          "short_id": "12345678" // <== short ID واقعی
+        }
+      },
+      "transport": {
+        "type": "tcp",
+        "path": "",
+        "headers": {
+          "type": "http",
+          "request": {
+            "version": "1.1",
+            "method": "GET",
+            "path": ["/cdn-cgi/trace"],
+            "headers": {
+              "Host": ["discord.com"],
+              "User-Agent": ["Mozilla/5.0 (iPhone; CPU iPhone OS 15_5 like Mac OS X)"],
+              "Accept-Encoding": ["gzip, deflate"],
+              "Connection": ["keep-alive"]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "type": "field",
+        "outbound": "Reality-Vision",
+        "domain": [
+          "geosite:google",
+          "geosite:facebook",
+          "geosite:youtube"
+        ]
+      },
+      {
+        "type": "field",
+        "outbound": "Warp-Main1",
+        "ip": [
+          "geoip:cn",
+          "geoip:ir"
+        ]
+      },
+      {
+        "type": "field",
+        "outbound": "Warp-IR1",
+        "domain": ["geosite:cn", "geosite:ir"]
+      }
+    ]
+  }
+}
